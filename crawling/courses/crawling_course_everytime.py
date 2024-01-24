@@ -2,11 +2,8 @@
 # pip install pandas
 # pip install selenium
 # pip install webdriver_manager
-
-import re
 import time
 import json
-import urllib.parse
 import pandas as pd
 import urllib.request
 from bs4 import BeautifulSoup
@@ -87,7 +84,6 @@ result_dict = {
     "notice": []          # 유의사항
 }
 
-
         
 cnt = 1;
 for tr, link in zip(trs, links_elems):
@@ -115,19 +111,13 @@ for tr, link in zip(trs, links_elems):
     driver.switch_to.window(driver.window_handles[-1])
     html = driver.page_source
     soup = BeautifulSoup(html, 'html.parser')
-        
-    # 강의 평가가 존재하지 않을 때
     avg = soup.select_one("span[class='average']").text
-    # 강의 평가가 존재할 때
-    print(avg)
     result.append(avg)
     result_dict.get('avg_score').append(avg)
     
     driver.close()
     # switching to previous tab
     driver.switch_to.window(driver.window_handles[0])
-    print(cnt)
-    cnt += 1
     
     result_dict.get('lecture_room').append(tds[7].text)
     result.append(tds[9].text) #담은인원
@@ -136,12 +126,9 @@ for tr, link in zip(trs, links_elems):
     result_dict.get('notice').append(tds[10].text)  
     
     results.append(result)
-
-
-
     
 if results:
-    print("성공!!")
+    print("success")
 
 # excel로 저장
 excel_column = 11
