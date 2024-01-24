@@ -4,14 +4,11 @@
 # pip install webdriver_manager
 import time
 import json
-import pandas as pd
-import urllib.request
 from bs4 import BeautifulSoup
-from openpyxl import Workbook,load_workbook
+from openpyxl import Workbook
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium import webdriver
-from urllib.request import urlopen
 from selenium.webdriver.common.by import By
 from selenium.webdriver.chrome.service import Service
 from webdriver_manager.chrome import ChromeDriverManager
@@ -19,8 +16,8 @@ from webdriver_manager.chrome import ChromeDriverManager
 url = 'https://everytime.kr/timetable'
 
 # User info
-USER_ID = 'km9844'
-USER_PW = 'tjddbs9844'
+USER_ID = 'user_id'
+USER_PW = 'user_password'
 
 driver = webdriver.Chrome(service=Service(ChromeDriverManager().install()))
 
@@ -137,7 +134,7 @@ write_ws = write_wb.create_sheet('result.xls')
 for data in results:
     write_ws = write_wb.active
     write_ws.append(data)
-write_wb.save('C:/Users/dlatj/OneDrive/Desktop/crawling_test/result.xls')
+write_wb.save('./result.xls')
 
 # Json으로 저장
 file_path = "./course_handbook.json"
