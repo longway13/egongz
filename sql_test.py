@@ -5,7 +5,7 @@ import pymysql
 import json
 
 # rds settings
-rds_host = "ysu-team-003-rds.cnmgd1eiu1rn.ap-northeast-2.rds.amazonaws.com"
+rds_host = ""
 name = rds_config.db_username
 password = rds_config.db_password
 db_name = rds_config.db_name
