@@ -1,3 +1,3 @@
-db_username='admin'
-db_password='dlrhdwm!'
-db_name='everytime_crawl'
+db_username=''
+db_password=''
+db_name=''
