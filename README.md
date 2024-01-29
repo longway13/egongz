@@ -1,7 +1,4 @@
-get_url.ipynb -> 특정 카테고리 url 따오기
-
-url.json -> 결과
-
-url_test.json -> 계정 차단 대비해서 이걸로 test하기
-
-get_detail.ipynb -> 크롤링
+get_url.py --> 최신 url 4페이지 가져옴
+get_detail.py --> everytime_computer_data.json 업데이트
+sql_input.py --> rds에 넣기
+elastic_inpuy.py --> elastic에 넣기
