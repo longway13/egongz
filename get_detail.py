@@ -1,36 +1,43 @@
-#!/usr/bin/env python
-# coding: utf-8
-
-# In[24]:
-
-
 import json
 import emoji
 import telegram
+
 from selenium import webdriver
+from selenium.webdriver.chrome.service import Service
+from webdriver_manager.chrome import ChromeDriverManager
+
+from selenium.webdriver.support import expected_conditions as EC
+from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.common.by import By
 from selenium.webdriver.common.keys import Keys
+from selenium.webdriver.chrome.options import Options
+
 from datetime import datetime
 import time
 from bs4 import BeautifulSoup
 import random
 from html import unescape
+import everytime_config
 
+from tqdm import tqdm
 
-# In[25]:
+ID = everytime_config.ID
+PW = everytime_config.PW
 
+chrome_options = Options()
+#chrome_options.add_argument('--headless')
+chrome_options.add_argument('--no-sandbox')
+chrome_options.add_argument('--disable-gpu')
+#chrome_options.add_argument('--user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.3')
 
-ID = ''
-PW = ''
-driver = webdriver.Chrome()
-driver.get('https://everytime.kr/login')
-driver.find_element(By.NAME, 'id').send_keys(ID)
+driver = webdriver.Chrome(service=Service(ChromeDriverManager().install()), options=chrome_options)
+
+everytime_url=[]
+driver.get("https://yonsei.everytime.kr/442356/v/")
+WebDriverWait(driver, 10).until(EC.visibility_of_element_located((By.NAME, 'id'))).send_keys(ID)
 driver.find_element(By.NAME, 'password').send_keys(PW)
 driver.find_element(By.XPATH, '//input[@value="에브리타임 로그인"]').click()
-
-
-# In[26]:
-
+time.sleep(3)
 
 def extract_text(tags):
     full_text = ""
@@ -39,7 +46,7 @@ def extract_text(tags):
         text = tag.get_text()
 
         # HTML 엔티티를 일반 텍스트로 변환 (예: &amp; -> &)
-        text = unescape(text)  # 이 부분에서 오류가 발생했습니다.
+        text = unescape(text)
 
         # 공백 제거 및 정리
         text = text.strip()
@@ -47,11 +54,7 @@ def extract_text(tags):
         # 텍스트 추가
         full_text += text + " "  # 단어 사이에 공백 추가
 
-    return full_text.strip()  # 마지막 공백 제거
-
-
-# In[27]:
-
+    return full_text.strip()
 
 def extract_comments(soup):
     comments = []
@@ -101,71 +104,60 @@ def extract_comments(soup):
 
     return comments
 
+def process_url(url, existing_data):
+    try:
+        driver.get("https://yonsei." + url)
+        time.sleep(3 + random.uniform(1, 5))
+        html_content = driver.page_source
+        soup = BeautifulSoup(html_content, 'html.parser')
+        title = extract_text(soup.find_all('h2', class_='large'))
+        detail = extract_text(soup.find('p', class_='large'))
+        likes = extract_text(soup.find('li', class_= "vote"))
+        comments_count = extract_text(soup.find('li', class_="comment"))
+        scraps = extract_text(soup.find('li', class_='scrap'))
+        comments = extract_comments(soup)
+        timestamp = extract_text(soup.find('time', class_='large'))
+        json_object = {
+            "title": title,
+            "detail": detail,
+            "likes": likes,
+            "comments_count": comments_count,
+            "scraps": scraps,
+            "url": url,
+            "comments": comments,
+            "timestamp": timestamp
+        }
+        return json_object
+    except Exception as e:
+        print(f"Error processing URL {url}: {str(e)}")
+        return None
 
-# In[34]:
+# 기존 데이터 로드
+existing_data = []
+with open("everytime_computer_data.json", 'r', encoding='UTF-8') as f:
+    for line in f:
+        existing_data.append(json.loads(line))
 
+# URL 데이터 로드
+with open("url.json", 'r', encoding='UTF-8') as f:
+    urls = json.load(f)
 
-result_dict = {
-    "title": [],
-    "detail": [],
-    "likes": [],
-    "comments_count": [],
-    "scraps": [],
-    "comments": [],
-    "url": [],
-    "timestamp": []
-}
+for url in tqdm(urls, "Processing URLs"):
+    existing_url_data = None
+    for data in existing_data:
+        if data['url'] == url:
+            existing_url_data = data
+            break
+    updated_json_object = process_url(url, existing_data)
+    if updated_json_object:
+        if existing_url_data:
+            existing_url_data.update(updated_json_object)
+        else:
+            existing_data.append(updated_json_object)
 
+# Write updated data back to the file
+with open("everytime_computer_data.json", 'w', encoding='UTF-8') as f:
+    for data in existing_data:
+        f.write(json.dumps(data, ensure_ascii=False) + '\n')
 
-# In[35]:
-
-
-file_path = "url_test.json"
-test = []
-with open(file_path, 'r', encoding='UTF-8') as json_file:
-    data = json.load(json_file)
-
-for url in data:
-    driver.get("https://" + url)
-    time.sleep(3 + random.uniform(1, 5))
-    html_content = driver.page_source
-    soup = BeautifulSoup(html_content, 'html.parser')
-    
-    title = extract_text(soup.find_all('h2', class_='large'))
-    detail = extract_text(soup.find('p', class_='large'))
-    likes = extract_text(soup.find('li', class_= "vote"))
-    comments_count = extract_text(soup.find('li', class_="comment"))
-    scraps = extract_text(soup.find('li', class_='scrap'))
-    comments = extract_comments(soup)
-    timestamp = extract_text(soup.find('time', class_='large'))
-
-    result_dict["title"].append(title)
-    result_dict["detail"].append(detail)
-    result_dict["likes"].append(likes)
-    result_dict["comments_count"].append(comments_count)
-    result_dict["scraps"].append(scraps)
-    result_dict["url"].append(url)
-    result_dict["comments"].append(comments)
-    result_dict["timestamp"].append(timestamp)
-    
-
-
-# In[33]:
-
-
-file_path="everytime_computer_data.json"
-with open(file_path, 'w', encoding='UTF-8') as json_file:
-    json.dump(result_dict, json_file, indent=2, ensure_ascii=False)
-
-
-# In[ ]:
-
-
-
-
-
-# In[ ]:
-
-
-
-
+driver.close()
