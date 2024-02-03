@@ -68,17 +68,17 @@ trs = soup.select('#subjects > div.list > table > tbody > tr')
 
 results = []
 result_dict = {
-    "grade": [],          # 학년
-    "type": [],           # 종별
-    "course_id": [],      # 학정번호
-    "credits": [],        # 학점
-    "course_name": [],    # 강의명
-    "prof_name": [],      # 담당교수
-    "time":[],            # 시간
-    "lecture_room": [],   # 강의실
-    "avg_score" : [],     # 강의 평가 점수
-    "add_num": [],        # 담은 인원
-    "notice": []          # 유의사항
+    "grade": None,          # 학년
+    "type": None,           # 종별
+    "course_id": None,      # 학정번호
+    "credits": None,        # 학점
+    "course_name": None,    # 강의명
+    "prof_name": None,      # 담당교수
+    "time": None,            # 시간
+    "lecture_room": None,   # 강의실
+    "avg_score" : None,     # 강의 평가 점수
+    "add_num": None,        # 담은 인원
+    "notice": None          # 유의사항
 }
 
         
@@ -87,20 +87,21 @@ for tr, link in zip(trs, links_elems):
     result=[]
     tds = tr.select('#subjects > div.list > table > tbody > tr > td')
     result.append(tds[0].text) #학년
-    result_dict.get('grade').append(tds[0].text)
+    result_dict['grade'] = tds[0].text
     result.append(tds[1].text) #종별
-    result_dict.get('type').append(tds[1].text)
+    result_dict['type'] = tds[1].text
     result.append(tds[2].text) #학정번호
-    result_dict.get('course_id').append(tds[2].text)
+    result_dict['course_id'] = tds[2].text
     result.append(tds[3].text) #학점
-    result_dict.get('credits').append(tds[3].text)
+    result_dict['credits'] = tds[3].text
     result.append(tds[4].text) #교과목명
-    result_dict.get('course_name').append(tds[4].text)
+    result_dict['course_name'] = tds[4].text
     result.append(tds[5].text) #담당교수
-    result_dict.get('prof_name').append(tds[5].text)
+    result_dict['prof_name'] = tds[5].text
     result.append(tds[6].text) #강의시간
-    result_dict.get('time').append(tds[6].text)
+    result_dict['time'] = tds[6].text
     result.append(tds[7].text) #강의실
+    result_dict['lecture_room'] = tds[7].text
     
     driver.execute_script("arguments[0].click();", link)
     time.sleep(2)
@@ -116,11 +117,10 @@ for tr, link in zip(trs, links_elems):
     # switching to previous tab
     driver.switch_to.window(driver.window_handles[0])
     
-    result_dict.get('lecture_room').append(tds[7].text)
     result.append(tds[9].text) #담은인원
-    result_dict.get('add_num').append(tds[9].text)
+    result_dict['add_num'] = tds[9].text
     result.append(tds[10].text) #유의사항
-    result_dict.get('notice').append(tds[10].text)  
+    result_dict['notice'] = tds[10].text
     
     results.append(result)
     
